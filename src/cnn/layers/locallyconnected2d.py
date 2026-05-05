@@ -13,14 +13,14 @@ class LocallyConnected2D:
     def forward(self, x):
                
         if x.ndim == 3:
-            return self._forward_single(x)
+            return self._forward(x)
 
         if x.ndim == 4:
-            return np.stack([self._forward_single(img) for img in x], axis=0)
+            return np.stack([self._forward(img) for img in x], axis=0)
 
         raise ValueError("Input must have shape (H, W, C) or (N, H, W, C)")
 
-    def _forward_single(self, x):
+    def _forward(self, x):
         H, W, C_in = x.shape
         kH, kW = self.kernel_size
 
