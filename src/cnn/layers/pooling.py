@@ -1,5 +1,3 @@
-# src/cnn/layers/pooling.py
-
 import numpy as np
 
 
