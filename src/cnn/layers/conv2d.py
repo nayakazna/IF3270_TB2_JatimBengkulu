@@ -15,7 +15,8 @@ class Conv2D:
         # (Image Number, Height, Width, Channel)
         elif x.ndim == 4:
             return np.stack([self._forward(img) for img in x], axis=0)
-        
+        else:
+            raise ValueError("Input must have shape (H,W,C) or (N,H,W,C)")
 
     def _forward(self, x):
         H, W, C_in = x.shape
