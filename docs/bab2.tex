@@ -1,18 +1,70 @@
 \section{Analisis dan Pembahasan}
 \subsection{Implementasi}
 
-
-\subsubsection{Kelas \code{Tensor} (\code{tensor.py})}
-Insert penjelasan kelas \code{nama\_kelas} here.
+\subsubsection{Modul CNN Layers}
+Berikut merupakan kelas-kelas layer yang diimplementasikan from scratch pada modul CNN.
 
 \begin{table}[H]
 \centering
-\caption{Atribut dan Metode Kelas \code{Tensor}}
-\begin{tabular}{llp{7cm}}
+\caption{Atribut dan Metode Kelas-kelas CNN}
+\begin{tabular}{lp{3cm}p{7cm}}
 \hline
-\textbf{Nama} & \textbf{Tipe} & \textbf{Deskripsi} \\
+\textbf{Kelas} & \textbf{Atribut / Metode} & \textbf{Deskripsi} \\
 \hline
+\multirow{4}{*}{\code{Conv2D}} & \code{weight, bias} & Parameter bobot konvolusi dan bias.\\
+& \code{stride, pad} & Langkah dan padding operasi konvolusi.\\
+& \code{\_forward(x)} & Operasi feedforward pada satu buah citra.\\
+& \code{forward(x)} & Operasi konvolusi batch / channel support.\\
+\hline
+\multirow{2}{*}{\code{LocallyConnected2D}} & \code{weight, bias, ...} & Bobot tidak dibagi ukurannya sesuai kernel/patch.\\
+& \code{forward(x)} & Forward propagation operasi locally connected.\\
+\hline
+\multirow{2}{*}{\code{Dense}} & \code{weights, bias} & Bobot linear (fully connected layer).\\
+& \code{forward(x)} & Feedforward (X $\cdot$ W + b) dan aktivasi.\\
+\hline
+\multirow{2}{*}{\code{Flatten}} & \code{forward(x)} & Mengubah tensor multidimensi menjadi vektor 1D.\\
+& \code{\_forward(x)} & Implementasi \code{reshape(-1)}.\\
+\hline
+\multirow{2}{*}{\code{MaxPooling2D}} & \code{pool\_size, stride} & Ukuran dan stride pooling filter.\\
+& \code{forward(x)} & Melakukan max pooling window spatial.\\
+\hline
+\multirow{2}{*}{\code{AveragePooling2D}} & \code{pool\_size, stride} & Ukuran dan stride pooling filter.\\
+& \code{forward(x)} & Melakukan average pooling window spatial.\\
+\hline
+\multirow{1}{*}{\code{GlobalAveragePooling2D}} & \code{forward(x)} & Mean pooling di seluruh dimensi spatial.\\
+\hline
+\multirow{1}{*}{\code{GlobalMaxPooling2D}} & \code{forward(x)} & Max pooling di seluruh dimensi spatial.\\
+\hline
+\end{tabular}
+\end{table}
 
+\subsubsection{Modul RNN \& LSTM Layers}
+Berikut merupakan kelas-kelas layer sekuensial yang diimplementasikan from scratch pada modul RNN dan LSTM.
+
+\begin{table}[H]
+\centering
+\caption{Atribut dan Metode Kelas-kelas RNN/LSTM}
+\begin{tabular}{lp{3cm}p{7cm}}
+\hline
+\textbf{Kelas} & \textbf{Atribut / Metode} & \textbf{Deskripsi} \\
+\hline
+\multirow{3}{*}{\code{SimpleRNNCell}} & \code{kernel} & Bobot rekursif dan input konvensional.\\
+& \code{recurrent\_kernel} & Bobot internal *hidden state* RNN.\\
+& \code{forward(x\_t, h\_prev)} & Perhitungan satu step state RNN.\\
+\hline
+\multirow{2}{*}{\code{SimpleRNN}} & \code{cell} & Menggunakan \code{SimpleRNNCell}.\\
+& \code{forward(x, init\_st)} & Unroll / loop t sequence waktu untuk RNN.\\
+\hline
+\multirow{3}{*}{\code{LSTMCell}} & \code{kernel, bias} & Bobot gabungan (4 gates) dan bias.\\
+& \code{recurrent\_kernel} & Bobot berulang untuk state sebelumnya.\\
+& \code{forward(x,h,c)} & Step kalkulasi input, forget, output, control gate. Menghasilkan sel dan *hidden* memori.\\
+\hline
+\multirow{2}{*}{\code{LSTM}} & \code{cell} & Menggunakan \code{LSTMCell}.\\
+& \code{forward(x, init\_st)} & Unroll step-by-step memory tracking.\\
+\hline
+\multirow{3}{*}{\code{Embedding}} & \code{weights} & Vector vocabulary size $\times$ dimension mapping.\\
+& \code{forward(token\_ids)} & Konversi integer token ids menjadi vektor dense.\\
+& \code{from\_keras(layer)} & Load transfer matriks embedding Keras.\\
 \hline
 \end{tabular}
 \end{table}

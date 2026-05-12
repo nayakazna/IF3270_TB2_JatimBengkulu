@@ -5,3 +5,5 @@
 *.mtc0
 *.out
 *.toc
+*.pyc
+notebooks/kaggle/
