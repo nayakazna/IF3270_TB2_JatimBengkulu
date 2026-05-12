@@ -9,55 +9,41 @@ class Conv2D:
         self.activation = activation
 
     def forward(self, x):
-        # (Height, Width, Channel)
         if x.ndim == 3:
-            return self._forward(x)
-        # (Image Number, Height, Width, Channel)
+            return self._forward_batch(x[np.newaxis])[0]
         elif x.ndim == 4:
-            return np.stack([self._forward(img) for img in x], axis=0)
+            return self._forward_batch(x)
         else:
             raise ValueError("Input must have shape (H,W,C) or (N,H,W,C)")
 
-    def _forward(self, x):
-        H, W, C_in = x.shape
-        kH, kW, C_weight, C_out = self.weight.shape
-
-        if C_in != C_weight:
-            raise ValueError(f"Input channel {C_in} != weight channel {C_weight}")
+    def _forward_batch(self, x):
+        N, H, W, C_in = x.shape
+        kH, kW, _, C_out = self.weight.shape
 
         if self.pad > 0:
-            x = np.pad(
-                x,
-                (
-                    (self.pad, self.pad),
-                    (self.pad, self.pad),
-                    (0, 0),
-                ),
-                mode="constant",
-            )
+            x = np.pad(x, ((0,0),(self.pad,self.pad),(self.pad,self.pad),(0,0)), mode="constant")
 
-        H_pad, W_pad, _ = x.shape
-
+        _, H_pad, W_pad, _ = x.shape
         H_out = (H_pad - kH) // self.stride + 1
         W_out = (W_pad - kW) // self.stride + 1
 
-        out = np.zeros((H_out, W_out, C_out), dtype=np.float32)
+        shape   = (N, H_out, W_out, kH, kW, C_in)
+        strides = (
+            x.strides[0],
+            x.strides[1] * self.stride,
+            x.strides[2] * self.stride,
+            x.strides[1],
+            x.strides[2],
+            x.strides[3],
+        )
+        patches = np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+        col = patches.reshape(N, H_out, W_out, -1)
 
-        for i in range(H_out):
-            for j in range(W_out):
-                h_start = i * self.stride
-                h_end = h_start + kH
-                w_start = j * self.stride
-                w_end = w_start + kW
+        W_col = self.weight.reshape(-1, C_out)
 
-                patch = x[h_start:h_end, w_start:w_end, :]
-
-                for c in range(C_out):
-                    out[i, j, c] = np.sum(
-                        patch * self.weight[:, :, :, c]
-                    ) + self.bias[c]
+        out = col @ W_col + self.bias
 
         if self.activation is not None:
             out = self.activation(out)
 
-        return out
+        return out.astype(np.float32)

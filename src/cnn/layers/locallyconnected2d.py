@@ -11,75 +11,47 @@ class LocallyConnected2D:
         self.activation = activation
 
     def forward(self, x):
-               
         if x.ndim == 3:
-            return self._forward(x)
-
-        if x.ndim == 4:
-            return np.stack([self._forward(img) for img in x], axis=0)
-
+            return self._forward_batch(x[np.newaxis])[0]
+        elif x.ndim == 4:
+            return self._forward_batch(x)
         raise ValueError("Input must have shape (H, W, C) or (N, H, W, C)")
 
-    def _forward(self, x):
-        H, W, C_in = x.shape
+
+    def _forward_batch(self, x):
+        N, H, W, C_in = x.shape
         kH, kW = self.kernel_size
 
         if self.pad > 0:
-            x = np.pad(
-                x,
-                (
-                    (self.pad, self.pad),
-                    (self.pad, self.pad),
-                    (0, 0),
-                ),
-                mode="constant",
-            )
+            x = np.pad(x, ((0,0),(self.pad,self.pad),(self.pad,self.pad),(0,0)), mode="constant")
 
-        H_pad, W_pad, _ = x.shape
-
+        _, H_pad, W_pad, _ = x.shape
         H_out = (H_pad - kH) // self.stride + 1
         W_out = (W_pad - kW) // self.stride + 1
-
         num_locations = H_out * W_out
-        patch_size = kH * kW * C_in
 
-        if self.weight.shape[0] != num_locations:
-            raise ValueError(
-                f"Weight locations {self.weight.shape[0]} != output locations {num_locations}"
-            )
+        shape   = (N, H_out, W_out, kH, kW, C_in)
+        strides = (
+            x.strides[0],
+            x.strides[1] * self.stride,
+            x.strides[2] * self.stride,
+            x.strides[1],
+            x.strides[2],
+            x.strides[3],
+        )
+        patches = np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+        col = patches.reshape(N, num_locations, -1)
 
-        if self.weight.shape[1] != patch_size:
-            raise ValueError(
-                f"Weight patch size {self.weight.shape[1]} != expected patch size {patch_size}"
-            )
+        out = np.einsum('nli,lio->nlo', col, self.weight, optimize=True)
 
-        C_out = self.weight.shape[2]
-        out = np.zeros((H_out, W_out, C_out), dtype=np.float32)
+        if self.bias.ndim == 2:
+            out = out + self.bias
+        else:
+            out = out + self.bias
 
-        location_idx = 0
-
-        for i in range(H_out):
-            for j in range(W_out):
-                h_start = i * self.stride
-                h_end = h_start + kH
-                w_start = j * self.stride
-                w_end = w_start + kW
-
-                patch = x[h_start:h_end, w_start:w_end, :]
-                patch_flat = patch.reshape(-1)
-
-                local_weight = self.weight[location_idx]
-
-                if self.bias.ndim == 2:
-                    local_bias = self.bias[location_idx]
-                else:
-                    local_bias = self.bias
-
-                out[i, j, :] = patch_flat @ local_weight + local_bias
-
-                location_idx += 1
+        out = out.reshape(N, H_out, W_out, -1)
 
         if self.activation is not None:
             out = self.activation(out)
 
-        return out
+        return out.astype(np.float32)
