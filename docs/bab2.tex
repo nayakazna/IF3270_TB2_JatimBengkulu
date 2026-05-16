@@ -48,8 +48,8 @@ Berikut merupakan kelas-kelas layer sekuensial yang diimplementasikan from scrat
 \hline
 \textbf{Kelas} & \textbf{Atribut / Metode} & \textbf{Deskripsi} \\
 \hline
-\multirow{3}{*}{\code{SimpleRNNCell}} & \code{kernel} & Bobot rekursif dan input konvensional.\\
-& \code{recurrent\_kernel} & Bobot internal *hidden state* RNN.\\
+\multirow{3}{*}{\code{SimpleRNNCell}} & \code{kernel} & Bobot transformasi input pada setiap timestep.\\
+& \code{recurrent\_kernel} & Bobot rekursif untuk \textit{hidden state} RNN.\\
 & \code{forward(x\_t, h\_prev)} & Perhitungan satu step state RNN.\\
 \hline
 \multirow{2}{*}{\code{SimpleRNN}} & \code{cell} & Menggunakan \code{SimpleRNNCell}.\\
@@ -57,7 +57,7 @@ Berikut merupakan kelas-kelas layer sekuensial yang diimplementasikan from scrat
 \hline
 \multirow{3}{*}{\code{LSTMCell}} & \code{kernel, bias} & Bobot gabungan (4 gates) dan bias.\\
 & \code{recurrent\_kernel} & Bobot berulang untuk state sebelumnya.\\
-& \code{forward(x,h,c)} & Step kalkulasi input, forget, output, control gate. Menghasilkan sel dan *hidden* memori.\\
+& \code{forward(x,h,c)} & Step kalkulasi input gate, forget gate, kandidat memori, dan output gate.\\
 \hline
 \multirow{2}{*}{\code{LSTM}} & \code{cell} & Menggunakan \code{LSTMCell}.\\
 & \code{forward(x, init\_st)} & Unroll step-by-step memory tracking.\\
@@ -72,5 +72,165 @@ Berikut merupakan kelas-kelas layer sekuensial yang diimplementasikan from scrat
 \subsection{Penjelasan Forward Propagation}
 % ----------------------------------------------------------
 \subsubsection{CNN}
+Forward propagation pada CNN menerima masukan citra berbentuk tensor
+$X \in \mathbb{R}^{N \times H \times W \times C}$, dengan $N$ sebagai
+jumlah sampel dalam batch, $H$ dan $W$ sebagai ukuran spasial citra, dan
+$C$ sebagai jumlah kanal. Pada implementasi \code{Conv2D}, input tunggal
+berdimensi $(H, W, C)$ terlebih dahulu diubah menjadi batch berukuran satu,
+sedangkan input batch diproses langsung. Apabila parameter \code{pad} lebih
+besar dari nol, citra diberi padding nol pada sisi spasial sebelum operasi
+konvolusi dilakukan.
+
+Untuk setiap posisi keluaran $(i,j)$ dan filter ke-$k$, layer konvolusi
+mengambil patch lokal berukuran $k_H \times k_W \times C$ dari input.
+Nilai keluaran dihitung dengan menjumlahkan hasil perkalian elemen patch
+dengan bobot filter, lalu menambahkan bias:
+\[
+Y_{n,i,j,k} =
+\sum_{u=0}^{k_H-1}
+\sum_{v=0}^{k_W-1}
+\sum_{c=0}^{C-1}
+X_{n, i \cdot s + u, j \cdot s + v, c}
+W_{u,v,c,k} + b_k
+\]
+dengan $s$ sebagai stride. Ukuran keluaran spasial dihitung sebagai:
+\[
+H_{out} = \left\lfloor \frac{H_{pad} - k_H}{s} \right\rfloor + 1,
+\qquad
+W_{out} = \left\lfloor \frac{W_{pad} - k_W}{s} \right\rfloor + 1.
+\]
+Pada kode, patch input dibentuk menggunakan \code{np.lib.stride\_tricks.as\_strided}
+agar seluruh patch dapat dipandang sebagai tensor enam dimensi. Patch tersebut
+kemudian diubah menjadi matriks kolom, bobot filter diubah menjadi matriks
+$W_{col}$, dan keluaran dihitung melalui perkalian matriks \code{col @ W\_col + bias}.
+Jika layer memiliki fungsi aktivasi, misalnya ReLU, aktivasi diterapkan setelah
+operasi linear tersebut.
+
+Pada \code{LocallyConnected2D}, alurnya mirip dengan \code{Conv2D}, tetapi bobot
+tidak dibagi antarposisi spasial. Artinya, setiap lokasi keluaran memiliki
+parameter sendiri. Jika jumlah lokasi keluaran adalah $L = H_{out}W_{out}$,
+maka bobot memiliki indeks lokasi sehingga perhitungan dapat ditulis sebagai:
+\[
+Y_{n,l,o} = \sum_i P_{n,l,i} W_{l,i,o} + b_{l,o}.
+\]
+Implementasi menggunakan \code{np.einsum} untuk menghitung perkalian patch
+dengan bobot lokal pada setiap lokasi. Pendekatan ini membuat
+\textit{locally connected layer} lebih fleksibel dibanding konvolusi biasa,
+tetapi jumlah parameternya jauh lebih besar karena tidak ada \textit{weight sharing}.
+
+Setelah konvolusi, pooling digunakan untuk mereduksi ukuran spasial feature map.
+Pada \code{MaxPooling2D}, setiap window pooling menghasilkan nilai maksimum:
+\[
+Y_{n,i,j,c} = \max_{(u,v) \in \Omega_{i,j}} X_{n,u,v,c}.
+\]
+Pada \code{AveragePooling2D}, nilai keluaran adalah rata-rata elemen dalam
+window:
+\[
+Y_{n,i,j,c} = \frac{1}{|\Omega_{i,j}|}
+\sum_{(u,v) \in \Omega_{i,j}} X_{n,u,v,c}.
+\]
+Layer \code{Flatten} kemudian mengubah tensor feature map menjadi vektor satu
+dimensi agar dapat masuk ke layer \code{Dense}. Pada layer \code{Dense}, forward
+propagation dihitung sebagai:
+\[
+Y = XW + b,
+\]
+diikuti fungsi aktivasi apabila tersedia. Dengan demikian, alur CNN secara
+umum adalah ekstraksi fitur lokal melalui konvolusi, reduksi spasial melalui
+pooling, perubahan bentuk melalui flatten, dan klasifikasi atau proyeksi akhir
+melalui dense layer.
+
 \subsubsection{RNN}
+Forward propagation pada Simple RNN digunakan untuk memproses data sekuensial,
+misalnya urutan embedding token caption. Input RNN direpresentasikan sebagai
+$X \in \mathbb{R}^{N \times T \times D}$, dengan $N$ sebagai batch size,
+$T$ sebagai panjang sekuens, dan $D$ sebagai dimensi fitur pada setiap timestep.
+Jika input hanya berbentuk $(T,D)$, implementasi menambahkan dimensi batch
+sementara agar proses komputasi tetap seragam.
+
+Simple RNN menyimpan informasi masa lalu dalam hidden state $h_t$. Pada timestep
+ke-$t$, \code{SimpleRNNCell} menerima input $x_t$ dan hidden state sebelumnya
+$h_{t-1}$. State baru dihitung dengan:
+\[
+h_t = \phi(x_t W_x + h_{t-1} W_h + b),
+\]
+dengan $W_x$ sebagai \code{kernel}, $W_h$ sebagai \code{recurrent\_kernel},
+$b$ sebagai bias, dan $\phi$ sebagai fungsi aktivasi, yaitu \code{tanh} pada
+implementasi ini. Jika \code{initial\_state} tidak diberikan, hidden state awal
+diinisialisasi sebagai vektor nol:
+\[
+h_0 = \mathbf{0}.
+\]
+
+Layer \code{SimpleRNN} melakukan \textit{unrolling} sepanjang timestep. Untuk
+setiap indeks waktu, layer memanggil \code{cell.forward(x[:, t, :], h\_t)} dan
+menyimpan hasilnya ke daftar keluaran. Jika \code{go\_backwards=True}, urutan
+dibaca dari timestep terakhir menuju timestep pertama, kemudian hasilnya
+dikembalikan ke urutan waktu semula. Jika \code{return\_sequences=True}, seluruh
+hidden state $[h_1, h_2, \ldots, h_T]$ dikembalikan sebagai tensor
+$(N,T,U)$. Jika \code{return\_sequences=False}, hanya hidden state terakhir yang
+dikembalikan sebagai representasi sekuens.
+
+Pada pipeline captioning, token caption terlebih dahulu diproses oleh
+\code{Embedding}. Forward propagation embedding hanya melakukan indexing pada
+matriks embedding:
+\[
+E_t = W_{emb}[\text{token}_t].
+\]
+Fitur citra dari encoder CNN diproyeksikan oleh layer dense, lalu disisipkan
+sebagai timestep awal decoder. Dengan teacher forcing, input decoder adalah
+gabungan fitur citra terproyeksi dan embedding token ground-truth sebelumnya.
+Output RNN kemudian diproyeksikan oleh dense layer akhir untuk menghasilkan
+logit atau probabilitas vocabulary pada setiap timestep.
+
 \subsubsection{LSTM}
+LSTM digunakan untuk mengatasi keterbatasan Simple RNN dalam menyimpan konteks
+jangka panjang. Berbeda dari Simple RNN yang hanya membawa hidden state, LSTM
+membawa dua state: hidden state $h_t$ dan cell state $c_t$. Hidden state
+berperan sebagai keluaran jangka pendek, sedangkan cell state menyimpan memori
+yang dapat diteruskan lebih stabil sepanjang sekuens.
+
+Pada setiap timestep, \code{LSTMCell} menghitung satu transformasi linear besar
+untuk empat komponen gate sekaligus:
+\[
+z = x_t W_x + h_{t-1} W_h + b.
+\]
+Vektor $z$ kemudian dibagi menjadi empat bagian:
+\[
+z_i, z_f, z_c, z_o = \text{split}(z).
+\]
+Masing-masing bagian digunakan untuk menghitung input gate, forget gate,
+kandidat memori, dan output gate:
+\[
+i_t = \sigma(z_i),
+\qquad
+f_t = \sigma(z_f),
+\qquad
+\tilde{c}_t = \tanh(z_c),
+\qquad
+o_t = \sigma(z_o).
+\]
+Cell state baru dihitung dengan menggabungkan memori lama dan kandidat memori
+baru:
+\[
+c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t.
+\]
+Forget gate $f_t$ menentukan bagian memori lama yang dipertahankan, sedangkan
+input gate $i_t$ menentukan bagian kandidat memori baru yang dimasukkan.
+Hidden state baru dihitung dari cell state yang sudah diperbarui:
+\[
+h_t = o_t \odot \tanh(c_t).
+\]
+Output gate $o_t$ mengontrol seberapa besar isi cell state yang diekspos sebagai
+keluaran timestep tersebut.
+
+Implementasi \code{LSTM} melakukan unroll dengan pola yang sama seperti
+\code{SimpleRNN}, tetapi setiap timestep memperbarui dua state sekaligus:
+\code{h\_t} dan \code{c\_t}. Jika \code{initial\_state} tidak diberikan, kedua
+state diinisialisasi dengan nol. Layer juga mendukung \code{return\_sequences},
+\code{return\_state}, dan \code{go\_backwards} agar perilakunya konsisten dengan
+layer Keras. Pada decoder captioning, keluaran LSTM pada setiap timestep
+diteruskan ke dense projection untuk menghasilkan distribusi probabilitas token
+berikutnya. Pada saat inferensi greedy, token dengan probabilitas terbesar
+dipilih, ditambahkan ke prefix, lalu proses forward diulang sampai token
+\code{<end>} muncul atau panjang maksimum caption tercapai.
