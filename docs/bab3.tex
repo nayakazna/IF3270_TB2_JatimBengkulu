@@ -8,7 +8,7 @@ Bagian ini menyajikan hasil eksperimen model CNN serta RNN/LSTM yang dijalankan 
 Berdasarkan hasil eksperimen pencarian parameter (\textit{hyperparameter sweep}) 16 konfigurasi menggunakan pustaka Keras, diperoleh analisis dari berbagai komponen variasi arsitektur CNN sebagai berikut. Parameter performa utama yang diukur adalah F1-Score (\textit{Macro}) pada himpunan data uji (\textit{test set}) dan waktu pelatihan model.
 
 \subsubsection{Pengaruh Jumlah Layer Konvolusi}
-Peningkatan kedalaman arsitektur dari 2 layer menjadi 3 layer lumayan meningkatkan performa model, soalnya rata-rata F1-Macro naik dari 0.8071 menjadi 0.8194. Seperti yang kami pelajari di kelas, arsitektur yang lebih dalam mampu mengekstraksi representasi fitur hierarkis yang lebih kompleks karena di sini kita meng-\textit{handle} data yang lebih kompleks yaitu gambar. Namun, penambahan layer ini juga mengakibatkan peningkatan beban komputasi pelatihan, dari rata-rata 107.88 detik menjadi 153.75 detik.
+Peningkatan kedalaman arsitektur dari 2 layer menjadi 3 layer lumayan meningkatkan performa model, soalnya rata-rata F1-Macro naik dari 0.7701 menjadi 0.8009. Seperti yang kami pelajari di kelas, arsitektur yang lebih dalam mampu mengekstraksi representasi fitur hierarkis yang lebih kompleks karena di sini kita meng-\textit{handle} data yang lebih kompleks yaitu gambar. Namun, penambahan layer ini juga mengakibatkan peningkatan beban komputasi pelatihan, dari rata-rata 107.81 detik menjadi 153.84 detik.
 
 \begin{figure}[H]
     \centering
@@ -17,7 +17,7 @@ Peningkatan kedalaman arsitektur dari 2 layer menjadi 3 layer lumayan meningkatk
 \end{figure}
 
 \subsubsection{Pengaruh Kapasitas Model (Banyak Filter)}
-Arsitektur dengan kapasitas parameter filter kecil (dimulai dari 32 filter) secara mengejutkan sedikit mengungguli arsitektur filter besar (dimulai dari 64 filter) dengan perolehan skor F1-Macro 0.7895 berbanding 0.7815. Namun, model berkapasitas besar memakan waktu komputasi yang jauh lebih lama (rata-rata 173.38 detik) dibandingkan model yang lebih ringan (88.25 detik). Hal ini mengindikasikan adanya \textit{diminishing return} atau sedikit \textit{overfitting} pada model dengan filter yang terlalu banyak untuk dataset ini.
+Arsitektur dengan kapasitas parameter filter kecil (dimulai dari 32 filter) secara mengejutkan sedikit mengungguli arsitektur filter besar (dimulai dari 64 filter) dengan perolehan skor F1-Macro 0.7895 berbanding 0.7815. Namun, model berkapasitas besar memakan waktu komputasi yang jauh lebih lama (rata-rata 173.36 detik) dibandingkan model yang lebih ringan (88.29 detik). Hal ini mengindikasikan adanya \textit{diminishing return} atau sedikit \textit{overfitting} pada model dengan filter yang terlalu banyak untuk dataset ini.
 
 \begin{figure}[H]
     \centering
@@ -26,7 +26,7 @@ Arsitektur dengan kapasitas parameter filter kecil (dimulai dari 32 filter) seca
 \end{figure}
 
 \subsubsection{Pengaruh Ukuran Kernel}
-Eksperimen membuktikan bahwa penggunaan resolusi kernel konvolusi $3 \times 3$ memberikan performa yang lebih baik (F1-Macro 0.7900) daripada agregasi informasi yang dilakukan oleh ukuran $5 \times 5$ (F1-Macro 0.7810). Kernel $3 \times 3$ lebih unggul dalam menangkap detail spasial lokal. Model dengan kernel $3 \times 3$ juga lebih efisien dengan waktu komputasi latih rata-rata 115.50 detik berbanding 146.13 detik pada kernel $5 \times 5$.
+Eksperimen membuktikan bahwa penggunaan resolusi kernel konvolusi $3 \times 3$ memberikan performa yang lebih baik (F1-Macro 0.7900) daripada agregasi informasi yang dilakukan oleh ukuran $5 \times 5$ (F1-Macro 0.7810). Kernel $3 \times 3$ lebih unggul dalam menangkap detail spasial lokal. Model dengan kernel $3 \times 3$ juga lebih efisien dengan waktu komputasi latih rata-rata 115.39 detik berbanding 146.27 detik pada kernel $5 \times 5$.
 
 \begin{figure}[H]
     \centering
@@ -35,7 +35,7 @@ Eksperimen membuktikan bahwa penggunaan resolusi kernel konvolusi $3 \times 3$ m
 \end{figure}
 
 \subsubsection{Pengaruh Jenis Pooling Layer}
-Model klasifikasi yang menerapkan \textit{Max Pooling} secara rata-rata lebih superior (F1-Macro 0.7917) bila disandingkan dengan penerapan \textit{Average Pooling} (0.7793). Hal ini dikarenakan operasi \textit{max} mampu meretensi fitur yang paling menonjol (\textit{salient features}) dari kumpulan aktivasi. \textit{Max pooling} berjalan dengan rata-rata waktu latih 147.25 detik, sedangkan \textit{average pooling} lebih cepat di 114.38 detik.
+Model klasifikasi yang menerapkan \textit{Max Pooling} secara rata-rata lebih superior (F1-Macro 0.7917) bila disandingkan dengan penerapan \textit{Average Pooling} (0.7793). Hal ini dikarenakan operasi \textit{max} mampu meretensi fitur yang paling menonjol (\textit{salient features}) dari kumpulan aktivasi. \textit{Max pooling} berjalan dengan rata-rata waktu latih 147.22 detik, sedangkan \textit{average pooling} lebih cepat di 114.44 detik.
 
 \begin{figure}[H]
     \centering
