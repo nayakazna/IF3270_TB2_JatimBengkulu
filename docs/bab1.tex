@@ -1,1 +1,65 @@
 \section{Deskripsi Persoalan}
+
+Tugas besar ini membahas implementasi dan evaluasi dua keluarga arsitektur
+\textit{deep learning}, yaitu \textit{Convolutional Neural Network} (CNN) dan
+\textit{Recurrent Neural Network} (RNN), dalam dua persoalan berbeda. Bagian CNN
+digunakan untuk persoalan klasifikasi citra, sedangkan bagian RNN dan LSTM
+digunakan untuk persoalan \textit{image captioning}.
+\subsection{Klasifikasi Citra dengan CNN}
+
+Persoalan pertama adalah klasifikasi citra menggunakan dataset Intel Image
+Classification. Dataset ini berisi gambar pemandangan alam dan lingkungan buatan
+dengan enam kelas, yaitu \textit{buildings}, \textit{forest}, \textit{glacier},
+\textit{mountain}, \textit{sea}, dan \textit{street}. Setiap gambar harus
+diprediksi ke salah satu kelas tersebut berdasarkan pola visual yang muncul pada
+citra.
+
+CNN cocok untuk persoalan ini karena operasi konvolusi mampu menangkap pola
+lokal seperti tepi, tekstur, bentuk, dan komposisi spasial. Pada tugas ini,
+arsitektur CNN dilatih menggunakan Keras, kemudian bobot hasil pelatihan
+digunakan kembali pada implementasi \textit{forward propagation} from \textit{scratch}.
+Implementasi yang dibuat mencakup \code{Conv2D} dengan \textit{shared
+parameters}, \code{LocallyConnected2D} dengan \textit{non-shared parameters},
+pooling, global pooling, flatten, dense layer, serta fungsi aktivasi yang
+diperlukan.
+
+Eksperimen CNN dilakukan dengan beberapa variasi arsitektur, yaitu jumlah layer
+konvolusi, jumlah filter, ukuran kernel, dan jenis pooling. Kinerja model
+dievaluasi menggunakan \textit{macro F1-score} pada data uji agar performa setiap
+kelas diperhitungkan secara seimbang. Selain itu, hasil \textit{forward
+propagation} implementasi \textit{from scratch} dibandingkan dengan hasil Keras
+untuk memastikan bahwa implementasi numeriknya sudah sesuai. Perbandingan antara
+arsitektur \textit{shared} dan \textit{non-shared} juga dilakukan untuk melihat
+pengaruh \textit{parameter sharing} terhadap akurasi, jumlah parameter, dan
+efisiensi komputasi.
+
+\subsection{Image Captioning dengan RNN dan LSTM}
+
+Persoalan kedua adalah \textit{image captioning}, yaitu menghasilkan deskripsi
+teks untuk sebuah gambar. Pada bagian ini digunakan dataset Flickr8k yang berisi
+gambar beserta beberapa caption referensi untuk setiap gambar. Model harus
+menghasilkan urutan kata yang menggambarkan isi gambar, sehingga persoalan ini
+menggabungkan pemrosesan visual dan pemrosesan sekuensial.
+
+Arsitektur yang digunakan mengikuti pendekatan \textit{encoder-decoder} dari
+\textit{Show and Tell} oleh Vinyals et al. Gambar diproses oleh CNN pretrained
+untuk menghasilkan \textit{feature vector}, lalu feature tersebut diproyeksikan
+dan dimasukkan sebagai timestep awal decoder dengan skema \textit{pre-inject}.
+Decoder berbasis Simple RNN atau LSTM kemudian menghasilkan caption kata demi
+kata.
+
+Pada tahap pelatihan, decoder dilatih menggunakan Keras dengan mekanisme
+\textit{teacher forcing}. Input decoder terdiri atas feature vector gambar yang
+telah diproyeksikan, token \code{<start>}, dan token-token caption sebelumnya,
+sedangkan targetnya adalah token caption yang digeser satu posisi ke depan.
+Bobot hasil pelatihan kemudian dapat dimuat ke implementasi \textit{from scratch}
+yang terdiri atas embedding layer, Simple RNN cell, LSTM cell, dense projection,
+dan dense output layer.
+
+Eksperimen RNN dan LSTM bertujuan membandingkan pengaruh jumlah layer recurrent
+dan ukuran hidden state terhadap kualitas caption. Evaluasi dilakukan
+menggunakan metrik BLEU-4 dan METEOR, serta memperhatikan waktu eksekusi. Selain
+itu, hasil decoder Keras dibandingkan dengan implementasi \textit{from scratch}
+untuk memvalidasi kesesuaian \textit{forward propagation}. Perbandingan utama
+antara Simple RNN dan LSTM digunakan untuk menganalisis perbedaan kemampuan
+keduanya dalam mempertahankan informasi (memori) untuk jangka panjang pada urutan kata.
