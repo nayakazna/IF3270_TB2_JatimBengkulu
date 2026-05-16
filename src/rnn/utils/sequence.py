@@ -17,6 +17,10 @@ def prepend_feature_timestep(projected_features, token_embeddings):
     elif projected_features.ndim != 2:
         raise ValueError("projected_features must have shape (D,) or (N, D)")
 
+    if token_embeddings.shape[0] == 1 and projected_features.shape[0] > 1:
+        token_embeddings = np.repeat(token_embeddings, projected_features.shape[0], axis=0)
+        squeeze_batch = False
+
     if projected_features.shape[0] == 1 and token_embeddings.shape[0] > 1:
         projected_features = np.repeat(projected_features, token_embeddings.shape[0], axis=0)
 
