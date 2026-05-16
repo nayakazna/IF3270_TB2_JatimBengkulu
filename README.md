@@ -1,178 +1,206 @@
 # Tugas Besar 2 IF3270 Pembelajaran Mesin
 
-## Convolutional Neural Network (CNN) dan Recurrent Neural Network (RNN/LSTM)
+Implementasi CNN serta RNN/LSTM untuk Tugas Besar 2 IF3270 Pembelajaran Mesin. Implementasi `from scratch` difokuskan pada forward propagation menggunakan Python dan NumPy, sedangkan Keras digunakan untuk training baseline dan sumber bobot pembanding.
 
-Implementasi Convolutional Neural Network (CNN) serta Recurrent Neural Network (RNN dan LSTM) dari nol menggunakan Python dan NumPy, untuk memenuhi spesifikasi Tugas Besar 2 IF3270 Pembelajaran Mesin 2025/2026.
+## Ruang Lingkup
 
-Tugas ini mencakup:
-
-* Implementasi forward propagation CNN, RNN, dan LSTM dari scratch
-* Pelatihan model menggunakan Keras sebagai baseline
-* Pengembangan pipeline *image captioning* berbasis encoder-decoder (CNN + LSTM/RNN)
-
----
+- CNN untuk klasifikasi citra Intel Image Classification.
+- RNN/LSTM untuk image captioning Flickr8k.
+- Perbandingan hasil Keras dan implementasi `from scratch`.
+- Evaluasi CNN menggunakan Macro F1-score.
+- Evaluasi captioning menggunakan BLEU-4 dan METEOR.
+- Batch inference untuk decoder captioning.
 
 ## Struktur Repository
 
-```
-├── README.md
+```text
+.
 ├── data/
-│   ├── raw/
-│   │   ├── intel_image_classification/
-│   │   └── flickr8k/
-│   ├── processed/
-│   └── features/
-│
+│   ├── features/
+│   ├── models/
+│   └── raw/
+├── docs/
+│   ├── main.tex
+│   ├── main.pdf
+│   ├── bab1.tex
+│   ├── bab2.tex
+│   ├── bab3.tex
+│   └── bab4.tex
 ├── notebooks/
-│
-├── doc/
-│   └── laporan.pdf
-│
-└── src/
-    ├── cnn/
-    │   ├── layers/
-    │   ├── models/
-    │   └── utils/
-    │   
-    │
-    └── rnn/
-        ├── layers/
-        ├── models/
-        └── utils/
+│   ├── cnn.ipynb
+│   └── rnn/
+│       ├── rnn_lstm.ipynb
+│       └── rnn-lstm_new.ipynb
+├── src/
+│   ├── cnn/
+│   │   ├── layers/
+│   │   └── utils/
+│   └── rnn/
+│       ├── layers/
+│       ├── utils/
+│       ├── train_rnn.py
+│       ├── train_lstm.py
+│       └── train_utils.py
+├── requirements.txt
+└── README.md
 ```
 
----
+Catatan: untuk RNN/LSTM, gunakan `notebooks/rnn/rnn-lstm_new.ipynb` sebagai notebook hasil terbaru. Notebook `rnn_lstm.ipynb` berisi hasil evaluasi lama sebelum fix.
 
-## Setup & Cara Menjalankan
-
-### 1. Clone repository
-
-```bash
-git clone https://github.com/<username>/<repo-name>.git
-cd <repo-name>
-```
-
-### 2. Buat virtual environment
+## Setup
 
 ```bash
 python -m venv venv
-source venv/bin/activate        # macOS/Linux
-# venv\Scripts\activate         # Windows
 ```
 
-### 3. Install dependencies
+Aktivasi environment:
+
+```bash
+# Windows PowerShell
+.\venv\Scripts\Activate.ps1
+
+# macOS/Linux
+source venv/bin/activate
+```
+
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+## Notebook Eksperimen
 
-## Dependensi
+### CNN
 
-* Python 3.8+
-* NumPy
-* TensorFlow / Keras
-* Matplotlib
-* scikit-learn
-* pandas
-* tqdm
-* nltk (untuk evaluasi captioning)
-* jupyter
+Notebook utama:
 
----
-
-## Deskripsi Tugas
-
-### 1. Convolutional Neural Network (CNN)
-
-* Implementasi layer CNN dari scratch:
-
-  * Conv2D (shared & non-shared / locally connected)
-  * Pooling (max & average)
-  * Flatten & Dense
-  * Fungsi aktivasi (ReLU, Softmax)
-* Pelatihan model CNN menggunakan Keras
-* Eksperimen:
-
-  * Variasi jumlah layer
-  * Jumlah filter
-  * Ukuran kernel
-  * Jenis pooling
-* Evaluasi menggunakan **macro F1-score**
-
----
-
-### 2. Recurrent Neural Network & LSTM
-
-* Implementasi dari scratch:
-
-  * Embedding layer
-  * Simple RNN cell
-  * LSTM cell
-  * Dense projection & output layer
-* Preprocessing caption (tokenisasi, padding, vocabulary)
-* Pelatihan model decoder menggunakan Keras
-* Eksperimen:
-
-  * Jumlah layer
-  * Ukuran hidden state
-* Evaluasi menggunakan:
-
-  * BLEU-4 score
-  * METEOR score
-
----
-
-### 3. Image Captioning Pipeline
-
-* Menggabungkan CNN encoder + RNN/LSTM decoder
-* Feature extraction menggunakan pretrained CNN (InceptionV3 / VGG16)
-* Implementasi inference dari raw image → caption
-* Perbandingan:
-
-  * RNN vs LSTM
-  * Keras vs from scratch
-
----
-
-## Cara Menjalankan Program
-
-### Training CNN
-
-```bash
-python src/cnn/train_cnn.py
+```text
+notebooks/cnn.ipynb
 ```
 
-### Training RNN / LSTM
+Isi utama:
 
-```bash
-python src/rnn/train_rnn.py
-python src/rnn/train_lstm.py
+- Implementasi forward propagation layer CNN dari scratch.
+- Training CNN dengan Keras untuk 16 konfigurasi.
+- Variasi jumlah layer, jumlah filter, ukuran kernel, dan jenis pooling.
+- Evaluasi Macro F1-score.
+- Perbandingan Keras vs `from scratch`.
+- Perbandingan `Conv2D` shared weights vs `LocallyConnected2D` non-shared weights.
+
+### RNN/LSTM
+
+Notebook utama terbaru:
+
+```text
+notebooks/rnn/rnn-lstm_new.ipynb
 ```
 
-### Menjalankan Image Captioning
+Isi utama:
+
+- Feature extraction gambar menggunakan InceptionV3 pretrained.
+- Caption preprocessing: tokenisasi, vocabulary, dan padding.
+- Training 6 variasi RNN dan 6 variasi LSTM.
+- Konversi bobot Keras ke layer NumPy `from scratch`.
+- Evaluasi BLEU-4 dan METEOR.
+- Perbandingan RNN vs LSTM.
+- Perbandingan Keras vs `from scratch`.
+- Analisis variasi `max_length`.
+- Analisis kualitatif contoh caption.
+
+## Implementasi From Scratch
+
+### CNN
+
+Layer tersedia di `src/cnn/layers/`:
+
+- `Conv2D`
+- `LocallyConnected2D`
+- `MaxPooling2D`
+- `AveragePooling2D`
+- `GlobalMaxPooling2D`
+- `GlobalAveragePooling2D`
+- `Flatten`
+- `Dense`
+- Aktivasi ReLU dan Softmax
+
+Utility tersedia di `src/cnn/utils/`:
+
+- image loader
+- batch loader
+- feature extractor
+
+### RNN/LSTM
+
+Layer tersedia di `src/rnn/layers/`:
+
+- `Embedding`
+- `SimpleRNNCell` dan `SimpleRNN`
+- `LSTMCell` dan `LSTM`
+- `StackedRNN`
+- `Dense`
+- Aktivasi sigmoid, tanh, dan softmax
+
+Utility tersedia di `src/rnn/utils/`:
+
+- caption preprocessing
+- feature extraction InceptionV3
+- greedy decoder
+- batch inference melalui `GreedyCaptionDecoder.generate_batch`
+- scoring BLEU-4 dan METEOR
+- helper konversi bobot Keras
+
+## Training Script RNN/LSTM
+
+Training decoder juga dapat dijalankan lewat script berikut dengan argumen dataset dan output yang sesuai:
 
 ```bash
-python src/pipeline/caption_generator.py
+python src/rnn/train_rnn.py --captions-path <path/to/captions.txt> --image-dir <path/to/images> --output-dir data/models/rnn
+python src/rnn/train_lstm.py --captions-path <path/to/captions.txt> --image-dir <path/to/images> --output-dir data/models/rnn
 ```
 
----
+Untuk eksperimen lengkap yang sudah menghasilkan tabel dan plot evaluasi, gunakan notebook RNN/LSTM terbaru.
+
+## Laporan
+
+Laporan LaTeX berada di folder `docs/`.
+
+File utama:
+
+```text
+docs/main.tex
+```
+
+PDF hasil kompilasi:
+
+```text
+docs/main.pdf
+```
+
+Kompilasi manual dari folder `docs/`:
+
+```bash
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+```
+
+## Status Bonus
+
+Sudah ada:
+
+- Batch inference decoder RNN/LSTM melalui `generate_batch`.
+
+Belum ada / belum menjadi bagian final:
+
+- Visualisasi intermediate feature maps CNN.
+- Grad-CAM CNN.
+- Beam search decoder.
+- Script end-to-end raw image ke caption di `src/pipeline/`.
 
 ## Pembagian Tugas
 
-| Nama     | NIM   | Tugas                                                              |
-| -------- | ----- | ------------------------------------------------------------------ |
-| <Nama 1> | <NIM> | <Job1>      |
-| <Nama 2> | <NIM> | <Job2>              |
-| <Nama 3> | <NIM> | <Job3> |
+| NIM | Nama | Tugas |
+| --- | --- | --- |
+| 13523092 | Muhammad Izzat Jundy | Notebook RNN/LSTM dan laporan |
+| 13523094 | Zulfaqqar Nayaka Athadiansyah | Notebook CNN dan laporan |
+| 13523098 | Muhammad Adha Ridwan | Implementasi model from scratch, feature extractor, batch inference, dan laporan |
 
----
-
-## Catatan
-
-* Implementasi forward propagation CNN, RNN, dan LSTM dilakukan **dari scratch menggunakan NumPy**
-* Keras digunakan hanya untuk pelatihan model dan pembanding
-* Seluruh eksperimen dan evaluasi dicatat dalam laporan
-
----
