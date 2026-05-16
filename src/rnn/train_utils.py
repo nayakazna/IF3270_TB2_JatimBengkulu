@@ -3,6 +3,8 @@ import json
 import os
 from pathlib import Path
 
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
 import numpy as np
 
 from src.rnn.utils.caption_preprocessing import (
@@ -56,8 +58,9 @@ def split_without_files(captions_by_image, validation_ratio, seed):
     rng = np.random.default_rng(seed)
     rng.shuffle(image_ids)
     val_count = max(1, int(len(image_ids) * validation_ratio))
+    test_count = val_count
     val_ids = set(image_ids[:val_count])
-    train_ids = set(image_ids[val_count:])
+    train_ids = set(image_ids[val_count + test_count:])
     return train_ids, val_ids
 
 
@@ -236,7 +239,7 @@ def train_decoder(decoder_type, args):
                 callbacks=callbacks,
             )
 
-            model.save_weights(run_dir / "weights.weights.h5")
+            model.save_weights(run_dir / "weights.h5")
             save_history(history, run_dir / "history.json")
             save_config(
                 {
