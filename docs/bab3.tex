@@ -8,66 +8,52 @@ Bagian ini menyajikan hasil eksperimen model CNN serta RNN/LSTM yang dijalankan 
 Berdasarkan hasil eksperimen pencarian parameter (\textit{hyperparameter sweep}) 16 konfigurasi menggunakan pustaka Keras, diperoleh analisis dari berbagai komponen variasi arsitektur CNN sebagai berikut. Parameter performa utama yang diukur adalah F1-Score (\textit{Macro}) pada himpunan data uji (\textit{test set}) dan waktu pelatihan model.
 
 \subsubsection{Pengaruh Jumlah Layer Konvolusi}
-Peningkatan kedalaman arsitektur dari 2 layer menjadi 3 layer secara signifikan meningkatkan performa model (F1-Macro naik dari 0.7607 menjadi 0.8058). Hal ini menunjukkan bahwa arsitektur yang lebih dalam mampu mengekstraksi representasi fitur hierarkis yang lebih kompleks. Namun, penambahan layer ini juga mengakibatkan peningkatan beban komputasi pelatihan, dari rata-rata 110.07 detik menjadi 181.56 detik.
+Peningkatan kedalaman arsitektur dari 2 layer menjadi 3 layer lumayan meningkatkan performa model, soalnya rata-rata F1-Macro naik dari 0.8071 menjadi 0.8194. Seperti yang kami pelajari di kelas, arsitektur yang lebih dalam mampu mengekstraksi representasi fitur hierarkis yang lebih kompleks karena di sini kita meng-\textit{handle} data yang lebih kompleks yaitu gambar. Namun, penambahan layer ini juga mengakibatkan peningkatan beban komputasi pelatihan, dari rata-rata 107.88 detik menjadi 153.75 detik.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/1_F1_Jumlah_Layer.png}
+    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/pengaruh_num_layers.png}
     \caption{Rata-rata F1-Score berdasarkan Jumlah Layer}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{assets/plot_laporan/1_Loss_Jumlah_Layer.png}
-    \caption{Grafik Loss Model Terbaik: 2 Layer vs 3 Layer}
 \end{figure}
 
 \subsubsection{Pengaruh Kapasitas Model (Banyak Filter)}
-Arsitektur dengan kapasitas parameter filter besar (dimulai dari 64 filter) sedikit mengungguli arsitektur filter kecil (dimulai dari 32 filter) dengan perolehan skor F1-Macro 0.7843 berbanding 0.7822. Perbedaan kinerja klasifikasi tersebut tidak terlalu eskalatif jika meninjau waktu latih yang harus dibayar. Model berkapasitas besar memakan waktu komputasi nyaris dua kali lipat lebih lama (191.80 detik) dibandingkan model yang lebih ringan (99.83 detik).
+Arsitektur dengan kapasitas parameter filter kecil (dimulai dari 32 filter) secara mengejutkan sedikit mengungguli arsitektur filter besar (dimulai dari 64 filter) dengan perolehan skor F1-Macro 0.7895 berbanding 0.7815. Namun, model berkapasitas besar memakan waktu komputasi yang jauh lebih lama (rata-rata 173.38 detik) dibandingkan model yang lebih ringan (88.25 detik). Hal ini mengindikasikan adanya \textit{diminishing return} atau sedikit \textit{overfitting} pada model dengan filter yang terlalu banyak untuk dataset ini.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/2_F1_Kapasitas_Filter.png}
+    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/pengaruh_filters.png}
     \caption{Rata-rata F1-Score berdasarkan Kapasitas Filter}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{assets/plot_laporan/2_Loss_Kapasitas_Filter.png}
-    \caption{Grafik Loss Model Terbaik: Filter Kecil vs Besar}
 \end{figure}
 
 \subsubsection{Pengaruh Ukuran Kernel}
-Eksperimen membuktikan bahwa penggunaan resolusi kernel konvolusi $3 \times 3$ memberikan performa yang jauh lebih baik (F1-Macro 0.7912) daripada agregasi informasi lebih besar yang dilakukan oleh ukuran $5 \times 5$ (F1-Macro 0.7753). Kernel $3 \times 3$ lebih unggul menangkap detail spasial. Model dengan kernel $3 \times 3$ juga lebih hemat waktu komputasi latih (117.63 detik berbanding 174.00 detik).
+Eksperimen membuktikan bahwa penggunaan resolusi kernel konvolusi $3 \times 3$ memberikan performa yang lebih baik (F1-Macro 0.7900) daripada agregasi informasi yang dilakukan oleh ukuran $5 \times 5$ (F1-Macro 0.7810). Kernel $3 \times 3$ lebih unggul dalam menangkap detail spasial lokal. Model dengan kernel $3 \times 3$ juga lebih efisien dengan waktu komputasi latih rata-rata 115.50 detik berbanding 146.13 detik pada kernel $5 \times 5$.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/3_F1_Ukuran_Kernel.png}
+    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/pengaruh_kernel.png}
     \caption{Rata-rata F1-Score berdasarkan Ukuran Kernel}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{assets/plot_laporan/3_Loss_Ukuran_Kernel.png}
-    \caption{Grafik Loss Model Terbaik: Ukuran Kernel $3 \times 3$ vs $5 \times 5$}
 \end{figure}
 
 \subsubsection{Pengaruh Jenis Pooling Layer}
-Model klasifikasi yang menerapkan \textit{Max Pooling} secara rata-rata lebih superior (F1-Macro 0.7913) bila disandingkan dengan penerapan \textit{Average Pooling} (0.7752). Hal ini dikarenakan operasi max meretensi nilai intensitas terkuat dari kumpulan fitur ketimbang meratakannya secara menyeluruh. \textit{Max pooling} berjalan dengan rerata waktu latih 157.54 detik.
+Model klasifikasi yang menerapkan \textit{Max Pooling} secara rata-rata lebih superior (F1-Macro 0.7917) bila disandingkan dengan penerapan \textit{Average Pooling} (0.7793). Hal ini dikarenakan operasi \textit{max} mampu meretensi fitur yang paling menonjol (\textit{salient features}) dari kumpulan aktivasi. \textit{Max pooling} berjalan dengan rata-rata waktu latih 147.25 detik, sedangkan \textit{average pooling} lebih cepat di 114.38 detik.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/4_F1_Jenis_Pooling.png}
+    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/pengaruh_pooling.png}
     \caption{Rata-rata F1-Score berdasarkan Jenis Pooling Layer}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{assets/plot_laporan/4_Loss_Jenis_Pooling.png}
-    \caption{Grafik Loss Model Terbaik: Max Pooling vs Average Pooling}
 \end{figure}
 
 \subsubsection{Perbandingan Keras vs \textit{From Scratch}}
-
+Pengujian dilakukan untuk memvalidasi kebenaran implementasi sepadan (\textit{equivalent}) antara pustaka Keras dan modul yang dibuat dari nol (\textit{scratch}). Menggunakan konfigurasi terbaik (\textit{exp\_14}), diperoleh hasil F1-Macro yang hampir identik: 0.8194 (Keras) berbanding 0.8186 (\textit{scratch}). Selisih yang sangat kecil (0.000879) ini membuktikan bahwa logika \textit{forward propagation} yang diimplementasikan telah akurat. Namun, terdapat perbedaan performa waktu eksekusi yang drastis, di mana Keras hanya membutuhkan 1.8 detik untuk inferensi sedangkan modul \textit{scratch} membutuhkan 154.1 detik akibat ketiadaan optimasi komputasi paralel tingkat rendah (GPU/XLA).
 
 \subsubsection{Perbandingan Arsitektur \textit{Shared} vs \textit{Non-shared}}
+Perbandingan dilakukan antara \textit{Conv2D} (\textit{shared weights}) dan \textit{LocallyConnected2D} (\textit{non-shared weights}). Hasil eksperimen menunjukkan bahwa arsitektur \textit{shared weights} jauh lebih efisien dan memiliki performa lebih baik (F1-Macro 0.8186 dengan 10.9M parameter) dibandingkan arsitektur \textit{non-shared} (F1-Macro 0.4255 dengan 18.9M parameter pada implementasi \textit{scratch}). Hal ini memperkuat teori bahwa \textit{translational invariance} yang dibawa oleh pembagian bobot sangat krusial untuk data gambar.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{assets/plot_laporan/shared_vs_nonshared_loss.png}
+    \caption{Grafik Loss: Shared vs Non-shared (Locally Connected)}
+\end{figure}
 
 \subsection{Simple RNN dan LSTM}
 \subsubsection{Perbandingan RNN dan LSTM}
@@ -75,3 +61,4 @@ Model klasifikasi yang menerapkan \textit{Max Pooling} secara rata-rata lebih su
 \subsubsection{Perbandingan dengan Keras}
 
 \subsubsection{Pengaruh Panjang Maksimum Caption terhadap BLEU-4}
+
