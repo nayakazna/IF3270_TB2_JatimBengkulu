@@ -1,6 +1,10 @@
 \section{Penutup}
 \subsection{Kesimpulan}
+Berdasarkan serangkaian eksperimen terhadap \textit{Convolutional Neural Network} (CNN) dan \textit{Recurrent Neural Network} (RNN/LSTM), didapatkan beberapa kesimpulan. Pada persoalan klasifikasi citra, arsitektur \textit{shared weights} (CNN) dengan konfigurasi \textit{Max Pooling} dan kernel $3 \times 3$ terbukti jauh lebih mantap dan efisien dibandingkan arsitektur \textit{non-shared weights}, kendati peningkatan kedalaman \textit{layer} perlu dibayar dengan durasi komputasi yang lebih lama. Sementara itu, pada persoalan \textit{image captioning}, arsitektur LSTM berkedalaman 2 \textit{layer} dengan ukuran \textit{hidden state} 128 menunjukkan performa yang lebih baik dari Simple RNN biasa. Penambahan \textit{layer} bertumpuk hingga level ketiga nyatanya sangat berisiko memicu \textit{overfitting} dan \textit{vanishing gradient}. Batasan panjang \textit{caption} rupanya tidak memengaruhi performa sama sekali. Secara keseluruhan, modul \textit{forward propagation} yang kami kembangkan \textit{from scratch} murni menggunakan NumPy terbukti menghasilkan performa yang cukup bisa mengimbangi Keras.
+
 \subsection{Saran}
+Adapun saran untuk pengembangan selanjutnya adalah mengimplementasikan \textit{backward propagation} dari nol agar pemahaman cara kerja model lebih utuh. Selain itu, eksperimen menggunakan \textit{Beam Search Decoder} patut dicoba sebagai alternatif dari \textit{greedy decoding} untuk menghasilkan kalimat yang lebih baik. Terakhir, penerapan arsitektur \textit{init-inject} saat menggabungkan fitur gambar dengan teks juga menarik untuk dieksplorasi perbandingannya.
+
 \subsection{Pembagian Tugas}
 
 \begin{table}[H]
@@ -10,9 +14,9 @@
 \toprule
 \textbf{NIM} & \textbf{Nama} & \textbf{Tugas} \\
 \midrule
-13523092 & Muhammad Izzat Jundy          & lorem ipsum \\
-13523094 & Zulfaqqar Nayaka Athadiansyah & lorem ipsum \\
-13523098 & Muhammad Adha Ridwan          & lorem ipsum \\
+13523092 & Muhammad Izzat Jundy          & Notebook RNN/LSTM dan laporan \\
+13523094 & Zulfaqqar Nayaka Athadiansyah & Notebook CNN dan laporan \\
+13523098 & Muhammad Adha Ridwan          & Implementasi model from scratch, implementasi feature extractor, batch inference, dan laporan \\
 \bottomrule
 \end{tabular}
 \end{table}
